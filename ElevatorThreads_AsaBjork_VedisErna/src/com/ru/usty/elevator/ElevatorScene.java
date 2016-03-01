@@ -1,7 +1,5 @@
 package com.ru.usty.elevator;
 
-import com.ru.usty.elevator.visualization.Person;
-
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
 
