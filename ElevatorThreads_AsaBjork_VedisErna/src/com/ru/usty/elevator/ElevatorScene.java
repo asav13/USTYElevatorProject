@@ -1,5 +1,7 @@
 package com.ru.usty.elevator;
 
+import com.ru.usty.elevator.visualization.Person;
+
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
 
@@ -21,8 +23,14 @@ public class ElevatorScene {
  * COPY THIS INTO ElevatorScene
  * Start copy here
  */
+	public static ElevatorScene scene;
+	ArrayList<Thread> elevators = new ArrayList<>();
 	ArrayList<Integer> exitedCount = null;
 	public static Semaphore exitedCountMutex;
+
+	public ElevatorScene() {
+		scene = this;
+	}
 
 	public void personExitsAtFloor(int floor) {
 		try {
@@ -53,7 +61,7 @@ public class ElevatorScene {
 
 	//TO SPEED THINGS UP WHEN TESTING,
 	//feel free to change this.  It will be changed during grading
-	public static final int VISUALIZATION_WAIT_TIME = 500;  //milliseconds
+	public static final int VISUALIZATION_WAIT_TIME = 50;  //milliseconds
 
 	private int numberOfFloors;
 	private int numberOfElevators;
@@ -68,15 +76,18 @@ public class ElevatorScene {
 	public void restartScene(int numberOfFloors, int numberOfElevators) {
 
 		/**
-		 * Important to add code here to make new
-		 * threads that run your elevator-runnables
+		 * Important to add code here to make new threads that run your elevator-runnables
 		 * 
-		 * Also add any other code that initializes
-		 * your system for a new run
+		 * Also add any other code that initializes your system for a new run
 		 * 
-		 * If you can, tell any currently running
-		 * elevator threads to stop
+		 * If you can, tell any currently running elevator threads to stop
 		 */
+
+		for(int i = 0; i < numberOfElevators; i++){
+			elevators.add(new Thread(new Elevator()));
+			elevators.get(i).start();
+		}
+
 
 		this.numberOfFloors = numberOfFloors;
 		this.numberOfElevators = numberOfElevators;
@@ -86,29 +97,25 @@ public class ElevatorScene {
 			this.personCount.add(0);
 		}
 		
-		/**
- * COPY THIS INTO restartScene
- * Start copy here
- */
-	if(exitedCount == null) {
-		exitedCount = new ArrayList<Integer>();
-	}
-	else {
-		exitedCount.clear();
-	}
-	for(int i = 0; i < getNumberOfFloors(); i++) {
-		this.exitedCount.add(0);
-	}
-	exitedCountMutex = new Semaphore(1);
-/**
- * End copy here
- */
+
+		if(exitedCount == null) {
+			exitedCount = new ArrayList<Integer>();
+		}
+		else {
+			exitedCount.clear();
+		}
+		for(int i = 0; i < getNumberOfFloors(); i++) {
+			this.exitedCount.add(0);
+		}
+		exitedCountMutex = new Semaphore(1);
+
 	}
 
 	//Base function: definition must not change
 	//Necessary to add your code in this one
 	public Thread addPerson(int sourceFloor, int destinationFloor) {
 
+		Thread thread = new Thread(new Person(sourceFloor, destinationFloor));
 		/**
 		 * Important to add code here to make a
 		 * new thread that runs your person-runnable
@@ -132,13 +139,20 @@ public class ElevatorScene {
 
 	//Base function: definition must not change, but add your code
 	public int getNumberOfPeopleInElevator(int elevator) {
-		
-		//dumb code, replace it!
+
+		//return elevators.get(elevator).
+		//dumb code, replace it
+		//
+		//
 		switch(elevator) {
 		case 1: return 1;
 		case 2: return 4;
 		default: return 3;
 		}
+	}
+
+	public void setNumberOfPeopleInElevator(int elevator){
+
 	}
 
 	//Base function: definition must not change, but add your code

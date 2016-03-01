@@ -161,12 +161,14 @@ Test case 9 is of the easiest level of complexity but tests both taking in full 
 			}
 			break;
 		case 4:
+			// addar 30 manns
 			for(int i = 0; i < 30; i++) {
 				int floorIn = random.nextInt(visualizationScene.getNumberOfFloors());
 				int floorOut = random.nextInt(visualizationScene.getNumberOfFloors() - 1);
 				if(floorOut >= floorIn) { floorOut++; }
 				personThreads.add(visualizationScene.addPerson(floorIn, floorOut));
 			}
+			// Addar 150 manns
 			for(int i = 0; i < 150; i++) {
 				Thread.sleep(ElevatorScene.VISUALIZATION_WAIT_TIME / 4);
 				int floorIn = random.nextInt(visualizationScene.getNumberOfFloors());

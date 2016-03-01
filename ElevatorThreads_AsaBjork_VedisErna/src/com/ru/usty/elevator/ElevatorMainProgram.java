@@ -2,8 +2,13 @@ package com.ru.usty.elevator;
 
 import com.ru.usty.elevator.visualization.TestSuite;
 
+import java.util.concurrent.Semaphore;
+
 public class ElevatorMainProgram {
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InterruptedException {
+
+
+
 
 		try {
 
