@@ -16,7 +16,7 @@ public class Person implements Runnable{
     @Override
     public void run() {
 
-        // Hækkar fjöldann í röðinni
+        // Hï¿½kkar fjï¿½ldann ï¿½ rï¿½ï¿½inni
         try {
             ElevatorScene.scene.incNumberOfPeopleWaitingAtFloor(src);
         } catch (InterruptedException e) {
@@ -24,14 +24,14 @@ public class Person implements Runnable{
         }
 
         try {
-            // Bidur í röð á hæðinni
+            // Bidur ï¿½ rï¿½ï¿½ ï¿½ hï¿½ï¿½inni
 
             (ElevatorScene.scene.waitingQueue.get(this.src)).acquire();
 
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        // eg fekk waitingQueue[src] semafóruna
+        // eg fekk waitingQueue[src] semafï¿½runa
 
         try {
             ElevatorScene.scene.decNumberOfPeopleWaitingAtFloor(src);
@@ -53,6 +53,13 @@ public class Person implements Runnable{
         // i am inside elevator
         System.out.println("I AM INSIDE ");
 
+        /*VÃ©dÃ­s*/
+                    try {
+                        ElevatorScene.scene.getOutOfElevator.acquire();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+        /*VÃ©dÃ­s*/
 
         // wait to get out
         System.out.println("I WAS LET OUT ");
