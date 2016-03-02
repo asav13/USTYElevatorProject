@@ -23,7 +23,7 @@ public class Elevator implements Runnable{
 
     @Override
     public void run() {
-        //hæða integer stjórna lúppu
+        //hï¿½ï¿½a integer stjï¿½rna lï¿½ppu
 
         int counter = 0;
         while(counter < 1) {
@@ -50,6 +50,7 @@ public class Elevator implements Runnable{
                     //then someone in the elevator wants to get out
                     System.out.println("Releasing on floor " + i);
                     ElevatorScene.scene.waitInElevator.get(index)[i].release();
+                    /*VÃ©dÃ­s*/    ElevatorScene.scene.getOutOfElevator.release();
                 }
 
                 // LET PPL IN

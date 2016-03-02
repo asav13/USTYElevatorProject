@@ -33,6 +33,8 @@ public class ElevatorScene {
     public static Semaphore peopleInElevatorMutex;
     public static Semaphore peopleWaitingOnFloorMutex;
 
+	public Semaphore getOutOfElevator;
+
 
 	ArrayList<Integer> peopleInElevator;
 	ArrayList<Integer> peopleWaitingOnFloor;
@@ -100,6 +102,7 @@ public class ElevatorScene {
         peopleInElevatorMutex       = new Semaphore(1);
         peopleWaitingOnFloorMutex   = new Semaphore(1);
 
+		/*Védís*/	getOutOfElevator = new Semaphore(0);
 	}
 
 	//Base function: definition must not change
@@ -172,12 +175,12 @@ public class ElevatorScene {
 
 	public void incNumberOfPeopleWaitingAtFloor(int floor) throws InterruptedException {
         peopleWaitingOnFloorMutex.acquire();
-		peopleWaitingOnFloor.set(floor, (peopleWaitingOnFloor.get(floor) + 1));
+			peopleWaitingOnFloor.set(floor, (peopleWaitingOnFloor.get(floor) + 1));
         peopleWaitingOnFloorMutex.release();
 	}
 	public void decNumberOfPeopleWaitingAtFloor(int floor) throws InterruptedException {
         peopleWaitingOnFloorMutex.acquire();
-		peopleWaitingOnFloor.set(floor, (peopleWaitingOnFloor.get(floor) - 1));
+			peopleWaitingOnFloor.set(floor, (peopleWaitingOnFloor.get(floor) - 1));
         peopleWaitingOnFloorMutex.release();
 	}
 
