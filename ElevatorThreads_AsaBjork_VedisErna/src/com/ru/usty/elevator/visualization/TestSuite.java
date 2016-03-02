@@ -72,7 +72,8 @@ Test case 9 is of the easiest level of complexity but tests both taking in full 
 	private static void initScene(final int sceneNumber) {
 		switch(sceneNumber) {
 		case 0:
-			visualizationScene.restartScene(2, 1);
+			//visualizationScene.restartScene(2, 1);
+            visualizationScene.restartScene(4,1);
 			break;
 		case 1:
 			visualizationScene.restartScene(4, 1);
@@ -115,13 +116,19 @@ Test case 9 is of the easiest level of complexity but tests both taking in full 
 
 		switch(sceneNumber) {
 		case 0:
-			for(int i = 0; i < 8; i++) {
+            Thread.sleep(ElevatorScene.VISUALIZATION_WAIT_TIME);
+            personThreads.add(visualizationScene.addPerson(0, 1));
+            Thread.sleep(ElevatorScene.VISUALIZATION_WAIT_TIME);
+            personThreads.add(visualizationScene.addPerson(0, 2));
+            Thread.sleep(ElevatorScene.VISUALIZATION_WAIT_TIME);
+            personThreads.add(visualizationScene.addPerson(0, 3));
+			/*for(int i = 0; i < 8; i++) {
 				personThreads.add(visualizationScene.addPerson(0, 1));
 			}
 			for(int i = 0; i < 20; i++) {
 				Thread.sleep(ElevatorScene.VISUALIZATION_WAIT_TIME);
 				personThreads.add(visualizationScene.addPerson(0, 1));
-			}
+			}*/
 			break;
 		case 1:
 			for(int i = 0; i < 8; i++) {

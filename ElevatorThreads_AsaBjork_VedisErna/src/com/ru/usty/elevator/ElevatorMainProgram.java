@@ -25,7 +25,7 @@ public class ElevatorMainProgram {
 			for(int i = 0; i <= 4; i++) {
 				TestSuite.runTest(i);
 			Thread.sleep(2000);
- 	}
+	}
 
 /*************************************************************/
 
