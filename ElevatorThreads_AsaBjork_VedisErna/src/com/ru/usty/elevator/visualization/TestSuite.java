@@ -14,7 +14,7 @@ TestSuite:
 You can now call runTest(i) for i between 0 and 9.
 
 The new test case 5 is more difficult than it was, 
-and should truly cause a starvation on the middle floor, 
+and should truly cause a starvation on the middle currFloor,
 until the other floors are more or less empty.  The old test case 5 is now test case 6.
 
 Test case 9 is of the easiest level of complexity but tests both taking in full elevators of
@@ -281,27 +281,12 @@ Test case 9 is of the easiest level of complexity but tests both taking in full 
 			}
 			break;
 		case 15:
-
-            personThreads.add(visualizationScene.addPerson(2, 1));
-            personThreads.add(visualizationScene.addPerson(2, 1));
-            personThreads.add(visualizationScene.addPerson(2, 1));
-            personThreads.add(visualizationScene.addPerson(2, 1));
-            personThreads.add(visualizationScene.addPerson(2, 1));
-            personThreads.add(visualizationScene.addPerson(2, 1));
-            personThreads.add(visualizationScene.addPerson(2, 1));
-            Thread.sleep(ElevatorScene.VISUALIZATION_WAIT_TIME * 10);
-
-            personThreads.add(visualizationScene.addPerson(2, 3));
-            personThreads.add(visualizationScene.addPerson(2, 3));
-            Thread.sleep(ElevatorScene.VISUALIZATION_WAIT_TIME * 10);
-            personThreads.add(visualizationScene.addPerson(3, 0));
-            personThreads.add(visualizationScene.addPerson(3, 0));
-            personThreads.add(visualizationScene.addPerson(3, 0));
-            personThreads.add(visualizationScene.addPerson(3, 0));
-            personThreads.add(visualizationScene.addPerson(3, 0));
-            personThreads.add(visualizationScene.addPerson(3, 0));
-            personThreads.add(visualizationScene.addPerson(3, 0));
-
+			for(int i = 0; i < 10; i++) {
+				personThreads.add(visualizationScene.addPerson(3, 0));
+				personThreads.add(visualizationScene.addPerson(2, 0));
+				personThreads.add(visualizationScene.addPerson(1, 0));
+				personThreads.add(visualizationScene.addPerson(1, 0));
+			}
 
             break;
 

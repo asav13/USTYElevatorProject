@@ -6,8 +6,8 @@ package com.ru.usty.elevator;
  */
 public class Person implements Runnable{
 
-    int src;
-    int dest;
+    private int src;
+    private int dest;
 
     public Person(int src, int dest){
         this.src = src;
@@ -15,68 +15,72 @@ public class Person implements Runnable{
     }
     @Override
     public void run() {
+        // Increment count of people waiting on source floor
+        incWaiting();
 
-        // H�kkar fj�ldann � r��inni
+        // Wait for a spot in an elevator
+        try {
+            ElevatorScene.scene.waitToGetInFromFloor.get(this.src).acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // When we are here it means we've gotten inside an elevator
+        // Increment people in elevator and decrement people waiting on floor
+        incInElevator();
+        decWaiting();
+
+        // Wait to get out
+        //  TODO fix HARDCOEDED ELEVATOR index!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        try {
+            ElevatorScene.scene.waitToGetOutOfElevatorToFloor.get(0)[dest].acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // When we're here it means we've gotten out of the elevator to our floor
+        // Decrement people in elevator and increment people outside of it
+        decInElevator();
+        incOutside();
+
+        // Then we need to kill the thread...right?
+    }
+
+    /* Helper functions for readability, too many "try catch" blocks */
+
+    private void incWaiting(){
         try {
             ElevatorScene.scene.incNumberOfPeopleWaitingAtFloor(src);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
 
-        try {
-            // Bidur � r�� � h��inni
-
-            (ElevatorScene.scene.waitingQueue.get(this.src)).acquire();
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        // eg fekk waitingQueue[src] semaf�runa
-
+    private void decWaiting(){
         try {
             ElevatorScene.scene.decNumberOfPeopleWaitingAtFloor(src);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
 
+    private void incInElevator(){
         try {
             ElevatorScene.scene.incNumberOfPeopleInElevator(0);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
 
-        try {
-            ((ElevatorScene.scene.waitInElevator.get(0))[dest]).acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        // i am inside elevator
-        System.out.println("I AM INSIDE and going to floor " + dest);
-
-        /*Védís*/
-                    try {
-                        ElevatorScene.scene.getOutOfElevator.get(0)[dest].acquire();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-        /*Védís*/
-
-        // wait to get out
-        System.out.println("I WAS LET OUT, my dest floor is " + dest);
-
+    private void decInElevator(){
         try {
             ElevatorScene.scene.decNumberOfPeopleInElevator(0);
-            ElevatorScene.scene.personExitsAtFloor(dest);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
 
-        // After that we know we're in it, Do something about us being inside the
-        // elevator, ++
-
-        // acquire some semaphore for waiting in the elev.
-
-        // then we know we're outside it
-
+    private void incOutside(){
+        ElevatorScene.scene.personExitsAtFloor(dest);
     }
 }

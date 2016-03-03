@@ -1,88 +1,86 @@
 package com.ru.usty.elevator;
 
-import javax.lang.model.element.ElementVisitor;
-import java.util.ArrayList;
-import java.util.concurrent.Semaphore;
-
 /**
  * @author Asa Bjork Valdimarsdottir - asav13@ru.is
  * @since 01-Mar-16.
  */
 public class Elevator implements Runnable{
 
-    public int floor;
-    private ElevatorScene scene;
-    public int index;
+    private int currFloor;
+    private int index;
     private boolean goingUp;
 
     public Elevator(int index) {
-        this.floor = 0;
-        this.index = index;
-
+        this.index      = index;
+        // Starts on currFloor one and goes up
+        this.currFloor = 0;
+        this.goingUp    = true;
     }
 
     @Override
     public void run() {
-        //h��a integer stj�rna l�ppu
 
-        int counter = 0;
-        while(counter < 1) {
-
-            int i = 0;
-
-            //for (int i = 0; i < ElevatorScene.scene.getNumberOfFloors(); i++) {
-            while(true){
-                // SET
-                try {
-                    ElevatorScene.scene.setCurrentFloorForElevator(index,i);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                //SLEEP
-                try {
-                    Thread.sleep(ElevatorScene.scene.VISUALIZATION_WAIT_TIME + index * 250);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                // LET PPL OUT //....
-                while(ElevatorScene.scene.waitInElevator.get(index)[i].availablePermits() < 6){
-                    //then someone in the elevator wants to get out
-                    System.out.println("Releasing on floor " + i);
-                    if(ElevatorScene.scene.getNumberOfPeopleInElevator(index) < 6) {
-                        System.out.println("number inside is " + ElevatorScene.scene.getNumberOfPeopleInElevator
-                                (index));
-                        ElevatorScene.scene.waitInElevator.get(index)[i].release(1);
-                    }
-                    /*Védís*/    ElevatorScene.scene.getOutOfElevator.get(index)[i].release();
-                }
-
-                // LET PPL IN
-                // for each floor if it has ppl
-                if (ElevatorScene.scene.keepOpen(index, i)) {
-                //we release queueu semaphore
-                    while(ElevatorScene.scene.getNumberOfPeopleInElevator(index) < 6 &&
-                            ElevatorScene.scene.keepOpen(index, i)){
-                        ElevatorScene.scene.waitingQueue.get(i).release();
-                    }
-                }
-
-                if(goingUp){
-                    if(i == ElevatorScene.scene.getNumberOfFloors()-1){
-                        goingUp = false;
-                        i--;
-                    }else {
-                        i++;
-                    }
-                }else{
-                    if(i == 0){
-                        goingUp = true;
-                        i++;
-                    }else {
-                        i--;
-                    }
+        while(true){
+            // Let people out
+            int counter = ElevatorScene.scene.getNumberOfPeopleInElevator(index);
+            // If there is someone in the elevator
+            if(counter > 0){
+                // And while there is someone in that elevator that wants to get out on this floor
+                while(ElevatorScene.scene.waitToGetOutOfElevatorToFloor.get(index)[currFloor].hasQueuedThreads()
+                        && counter > 0){
+                    // Let one out at a time
+                    ElevatorScene.scene.waitToGetOutOfElevatorToFloor.get(index)[currFloor].release(1);
+                    counter--;
                 }
             }
+
+            // Let people in to the elevator
+            counter = ElevatorScene.scene.getNumberOfPeopleInElevator(index);
+            // If we have space and there is someone waiting on the current floor
+            if(ElevatorScene.scene.getNumberOfPeopleWaitingAtFloor(currFloor) > 0 && counter < 6){
+                // We let people in while the elevator is not full
+                while(counter < 6){
+                    ElevatorScene.scene.waitToGetInFromFloor.get(currFloor).release(1);
+                    counter++;
+                }
+            }
+
+            switchFloor();      // Move elevator
+            elevatorSleep();    // Visualization
+        }
+    }
+
+    /* Helper functions for readability, too many "try catch" blocks */
+
+    private void setFloorInScene(){
+        try {
+            ElevatorScene.scene.setCurrentFloorForElevator(index,currFloor);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void switchFloor(){
+        if(goingUp && currFloor < ElevatorScene.scene.getNumberOfFloors()-1){
+            currFloor++;
+        } else {
+            if(currFloor == 0){
+                goingUp = true;
+                currFloor++;
+            } else {
+                goingUp = false;
+                currFloor--;
+            }
+        }
+        // SetFloor
+        setFloorInScene();
+    }
+
+    private void elevatorSleep(){
+        try {
+            Thread.sleep(ElevatorScene.scene.VISUALIZATION_WAIT_TIME);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 }
