@@ -49,8 +49,12 @@ public class Elevator implements Runnable{
                 while(ElevatorScene.scene.waitInElevator.get(index)[i].availablePermits() < 6){
                     //then someone in the elevator wants to get out
                     System.out.println("Releasing on floor " + i);
-                    ElevatorScene.scene.waitInElevator.get(index)[i].release();
-                    /*Védís*/    ElevatorScene.scene.getOutOfElevator.release();
+                    if(ElevatorScene.scene.getNumberOfPeopleInElevator(index) < 6) {
+                        System.out.println("number inside is " + ElevatorScene.scene.getNumberOfPeopleInElevator
+                                (index));
+                        ElevatorScene.scene.waitInElevator.get(index)[i].release(1);
+                    }
+                    /*Védís*/    ElevatorScene.scene.getOutOfElevator.get(index)[i].release();
                 }
 
                 // LET PPL IN

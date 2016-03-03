@@ -1,6 +1,5 @@
 package com.ru.usty.elevator;
 
-import sun.plugin2.applet.SecurityManagerHelper;
 
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
@@ -14,7 +13,7 @@ import java.util.concurrent.Semaphore;
  */
 
 public class ElevatorScene {
-	public static final int VISUALIZATION_WAIT_TIME = 1500;  //milliseconds
+	public static final int VISUALIZATION_WAIT_TIME = 500;  //milliseconds
 
 	public static ElevatorScene scene;
 	private int numberOfFloors;
@@ -24,16 +23,18 @@ public class ElevatorScene {
 
 	public ArrayList<Semaphore> waitingQueue;
 
+	public ArrayList<Semaphore[]> getOutOfElevator;
+
     public ArrayList<Integer> currFloor;
 
 	ArrayList<Thread> elevators = new ArrayList<>();
-	ArrayList<Integer> exitedCount = null;
+	ArrayList<Integer> exitedCount;
 	public static Semaphore exitedCountMutex;
     public static Semaphore currFloorMutex;
     public static Semaphore peopleInElevatorMutex;
     public static Semaphore peopleWaitingOnFloorMutex;
 
-	public Semaphore getOutOfElevator;
+
 
 
 	ArrayList<Integer> peopleInElevator;
@@ -42,67 +43,80 @@ public class ElevatorScene {
 	public ElevatorScene() {
 		waitInElevator = new ArrayList<Semaphore[]>();
 		waitingQueue = new ArrayList<Semaphore>();
+		getOutOfElevator= new ArrayList<Semaphore[]>();
+		peopleWaitingOnFloor = new ArrayList<Integer>();
+		peopleInElevator = new ArrayList<Integer>();
 		scene = this;
         currFloor = new ArrayList<>();
+		exitedCount = new ArrayList<Integer>();
 	}
 
 	//Base function: definition must not change
 	//Necessary to add your code in this one
 	public void restartScene(int numberOfFloors, int numberOfElevators) {
-
 		/**
 		 * Important to add code here to make new threads that run your elevator-runnables
 		 * Also add any other code that initializes your system for a new run
 		 * If you can, tell any currently running elevator threads to stop
 		 */
+		/* State variables*/
+		this.numberOfFloors = numberOfFloors;
+		this.numberOfElevators = numberOfElevators;
 
+		/* MUTEXES */
+		this.exitedCountMutex            = new Semaphore(1);
+		currFloorMutex              = new Semaphore(1);
+		peopleInElevatorMutex       = new Semaphore(1);
+		peopleWaitingOnFloorMutex   = new Semaphore(1);
+
+		/* ELEVATOR THREADS */
+		elevators.clear();
 		for(int i = 0; i < numberOfElevators; i++){
 			elevators.add(new Thread(new Elevator(i)));
 			elevators.get(i).start();
 		}
+
+		/* Semaphores for waiting inside an elevator, getting out of it */
 		waitInElevator.clear();
-		for(int i = 0;i < numberOfFloors; i++){
-			// TODO ATH MED AD NYTA PLASS
+		getOutOfElevator.clear();
+		for(int i = 0;i < numberOfElevators; i++){
+
 			Semaphore[] semForDestFloor = new Semaphore[numberOfFloors];
 			for(int j = 0; j < numberOfFloors; j++){
 				semForDestFloor[j] = new Semaphore(6);
 			}
 			waitInElevator.add(semForDestFloor);
+
+			semForDestFloor = new Semaphore[numberOfFloors];
+			for(int j = 0; j < numberOfFloors; j++){
+				semForDestFloor[j] = new Semaphore(0);
+			}
+			getOutOfElevator.add(semForDestFloor);
 		}
 
+		/*waiting queue and nr of people on floor*/
+		peopleWaitingOnFloor.clear();
+		waitingQueue.clear();
 
-		this.numberOfFloors = numberOfFloors;
-		this.numberOfElevators = numberOfElevators;
-
-		peopleWaitingOnFloor = new ArrayList<Integer>();
 		for(int i = 0; i < numberOfFloors; i++) {
 			this.peopleWaitingOnFloor.add(0);
-			//this.waitingQueue.add(new Semaphore(0));
-            this.waitingQueue.add(new Semaphore(1));
+			this.waitingQueue.add(new Semaphore(0));
 		}
 
-
-		peopleInElevator = new ArrayList<Integer>();
+		/*ppl inside elevator*/
+		peopleInElevator.clear();
 		for(int i = 0; i < numberOfElevators; i++) {
 			this.peopleInElevator.add(0);
             this.currFloor.add(0);
+
 		}
 
-		if(exitedCount == null) {
-			exitedCount = new ArrayList<Integer>();
-		}
-		else {
-			exitedCount.clear();
-		}
+		/*ppl in exit room on floor*/
+		exitedCount.clear();
 		for(int i = 0; i < getNumberOfFloors(); i++) {
 			this.exitedCount.add(0);
 		}
-		exitedCountMutex            = new Semaphore(1);
-        currFloorMutex              = new Semaphore(1);
-        peopleInElevatorMutex       = new Semaphore(1);
-        peopleWaitingOnFloorMutex   = new Semaphore(1);
 
-		/*Védís*/	getOutOfElevator = new Semaphore(0);
 	}
 
 	//Base function: definition must not change

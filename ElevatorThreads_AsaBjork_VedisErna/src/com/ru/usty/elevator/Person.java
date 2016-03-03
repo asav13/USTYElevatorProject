@@ -51,18 +51,18 @@ public class Person implements Runnable{
             e.printStackTrace();
         }
         // i am inside elevator
-        System.out.println("I AM INSIDE ");
+        System.out.println("I AM INSIDE and going to floor " + dest);
 
         /*Védís*/
                     try {
-                        ElevatorScene.scene.getOutOfElevator.acquire();
+                        ElevatorScene.scene.getOutOfElevator.get(0)[dest].acquire();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
         /*Védís*/
 
         // wait to get out
-        System.out.println("I WAS LET OUT ");
+        System.out.println("I WAS LET OUT, my dest floor is " + dest);
 
         try {
             ElevatorScene.scene.decNumberOfPeopleInElevator(0);
