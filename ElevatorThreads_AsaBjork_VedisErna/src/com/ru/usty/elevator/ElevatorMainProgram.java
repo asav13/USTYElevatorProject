@@ -18,19 +18,20 @@ public class ElevatorMainProgram {
 
 			Thread.sleep(1000);
 
-			TestSuite.runTest(15);
+			//TestSuite.runTest(15);
 
-			Thread.sleep(100002000);
-
-/*			for(int i = 0; i <= 4; i++) {
-				TestSuite.runTest(i);
 			Thread.sleep(2000);
-	}*/
+
+			for(int i = 0; i <= 4; i++) {
+				TestSuite.runTest(i);
+			Thread.sleep(12000);
+	}
 
 /*************************************************************/
 
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
+			System.out.println("ERROR in main program.");
 			e.printStackTrace();
 		}
 		

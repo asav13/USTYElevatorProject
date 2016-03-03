@@ -6,21 +6,22 @@ package com.ru.usty.elevator;
  */
 public class Elevator implements Runnable{
 
-    private int currFloor;
-    private int index;
+    private int     currFloor;
+    private int     index;
     private boolean goingUp;
 
     public Elevator(int index) {
         this.index      = index;
-        // Starts on currFloor one and goes up
-        this.currFloor = 0;
-        this.goingUp    = true;
+        this.currFloor  = 0;    // Starts on first floor
+        this.goingUp    = true; // Starts by going up
     }
 
     @Override
     public void run() {
 
         while(true){
+            elevatorSleep();    // Visualization
+
             // Let people out
             int counter = ElevatorScene.scene.getNumberOfPeopleInElevator(index);
             // If there is someone in the elevator
@@ -31,22 +32,23 @@ public class Elevator implements Runnable{
                     // Let one out at a time
                     ElevatorScene.scene.waitToGetOutOfElevatorToFloor.get(index)[currFloor].release(1);
                     counter--;
+                    elevatorSleep();    // Visualization
                 }
             }
 
             // Let people in to the elevator
             counter = ElevatorScene.scene.getNumberOfPeopleInElevator(index);
             // If we have space and there is someone waiting on the current floor
-            if(ElevatorScene.scene.getNumberOfPeopleWaitingAtFloor(currFloor) > 0 && counter < 6){
+            if(ElevatorScene.scene.getNumberOfPeopleWaitingAtFloor(currFloor) > 0 && counter < ElevatorScene.scene.ELEVATOR_CAPACITY){
                 // We let people in while the elevator is not full
-                while(counter < 6){
+                while(counter < ElevatorScene.scene.ELEVATOR_CAPACITY){
                     ElevatorScene.scene.waitToGetInFromFloor.get(currFloor).release(1);
                     counter++;
+                    if(counter < 6) { elevatorSleep(); }    // Visualization, no sleep when full
                 }
             }
 
             switchFloor();      // Move elevator
-            elevatorSleep();    // Visualization
         }
     }
 

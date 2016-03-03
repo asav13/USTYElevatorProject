@@ -13,7 +13,7 @@ import java.util.concurrent.Semaphore;
  */
 
 public class ElevatorScene {
-	public static final int VISUALIZATION_WAIT_TIME = 500;  // milliseconds
+	public static final int VISUALIZATION_WAIT_TIME = 300;  // milliseconds
 	public static final	int ELEVATOR_CAPACITY 		= 6;	// max six people per elevator
 
 	public static ElevatorScene scene;
@@ -84,13 +84,14 @@ public class ElevatorScene {
 		}
 
 		/* MUTEXES */
-		this.exitedCountMutex		= new Semaphore(1);
-		this.currFloorMutex              = new Semaphore(1);
-		this.peopleInElevatorMutex       = new Semaphore(1);
-		this.peopleWaitingOnFloorMutex   = new Semaphore(1);
+		this.exitedCountMutex			= new Semaphore(1);
+		this.currFloorMutex             = new Semaphore(1);
+		this.peopleInElevatorMutex      = new Semaphore(1);
+		this.peopleWaitingOnFloorMutex  = new Semaphore(1);
 
 		/* nr of people on currFloor*/
 		this.peopleWaitingOnFloor.clear();
+		this.exitedCount.clear();
 		for(int i = 0; i < numberOfFloors; i++) {
 			this.peopleWaitingOnFloor.add(0);
 			this.exitedCount.add(0);
@@ -121,6 +122,9 @@ public class ElevatorScene {
 	//Base function: definition must not change, but add your code
 	public int getNumberOfPeopleInElevator(int elevator) {
 		int r = -1;
+		if(peopleInElevatorMutex == null){
+			peopleInElevatorMutex = new Semaphore(1);
+		}
         try {
             peopleInElevatorMutex.acquire();
 				r = peopleInElevator.get(elevator);
@@ -146,8 +150,15 @@ public class ElevatorScene {
 	//Base function: definition must not change, but add your code
 	public int getNumberOfPeopleWaitingAtFloor(int floor) {
 		int r = -1;
+		if(peopleWaitingOnFloorMutex == null){
+			peopleInElevatorMutex = new Semaphore(1);
+		}
         try {
+
             peopleWaitingOnFloorMutex.acquire();
+			if(floor > peopleWaitingOnFloor.size()){
+				return 0;
+			}
 			r = peopleWaitingOnFloor.get(floor);
 			peopleWaitingOnFloorMutex.release();
         } catch (InterruptedException e) {
@@ -212,6 +223,7 @@ public class ElevatorScene {
     }
 
     public int getExitedCountAtFloor(int floor) {
+
         if(floor < getNumberOfFloors()) {
             return exitedCount.get(floor);
         }
