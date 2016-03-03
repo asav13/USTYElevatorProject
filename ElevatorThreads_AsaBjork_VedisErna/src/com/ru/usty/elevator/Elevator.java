@@ -75,10 +75,6 @@ public class Elevator implements Runnable{
         }
     }
 
-    private void switchTo(int f){
-        currFloor = f;
-        setFloorInScene();
-    }
 
     private void switchFloor(){
         if(noNeedToMove()){
@@ -90,11 +86,10 @@ public class Elevator implements Runnable{
             if(currFloor == 0){
                 goingUp = true;
                 currFloor++;
-            } else /*if(needToGoDown())*/ {
+            } else {
                 goingUp = false;
-                if(needToGoDown()) {
-                    currFloor--;
-                }
+                currFloor--;
+                if(currFloor < 0) currFloor = 0; // Just safety measures
             }
         }
         // SetFloor
@@ -144,6 +139,11 @@ public class Elevator implements Runnable{
             if(ElevatorScene.scene.waitToGetOutOfElevatorToFloor.get(index)[f].hasQueuedThreads()){
                 return true;
             }
+        }
+        try {
+            Thread.sleep(ElevatorScene.VISUALIZATION_WAIT_TIME);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
         return false;
     }
