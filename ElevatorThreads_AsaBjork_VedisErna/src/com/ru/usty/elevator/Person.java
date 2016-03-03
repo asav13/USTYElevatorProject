@@ -8,10 +8,12 @@ public class Person implements Runnable{
 
     private int src;
     private int dest;
+    private int elevatorIndex;
 
     public Person(int src, int dest){
         this.src = src;
         this.dest = dest;
+        this.elevatorIndex = 0;
     }
     @Override
     public void run() {
@@ -26,14 +28,15 @@ public class Person implements Runnable{
         }
 
         // When we are here it means we've gotten inside an elevator
+        this.elevatorIndex = ElevatorScene.scene.getWhoIsLettingIn();
+
         // Increment people in elevator and decrement people waiting on floor
         incInElevator();
         decWaiting();
 
         // Wait to get out
-        //  TODO fix HARDCOEDED ELEVATOR index!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         try {
-            ElevatorScene.scene.waitToGetOutOfElevatorToFloor.get(0)[dest].acquire();
+            ElevatorScene.scene.waitToGetOutOfElevatorToFloor.get(this.elevatorIndex)[dest].acquire();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -66,7 +69,7 @@ public class Person implements Runnable{
 
     private void incInElevator(){
         try {
-            ElevatorScene.scene.incNumberOfPeopleInElevator(0);
+            ElevatorScene.scene.incNumberOfPeopleInElevator(this.elevatorIndex);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -74,7 +77,7 @@ public class Person implements Runnable{
 
     private void decInElevator(){
         try {
-            ElevatorScene.scene.decNumberOfPeopleInElevator(0);
+            ElevatorScene.scene.decNumberOfPeopleInElevator(this.elevatorIndex);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -83,4 +86,6 @@ public class Person implements Runnable{
     private void incOutside(){
         ElevatorScene.scene.personExitsAtFloor(dest);
     }
+
+
 }
