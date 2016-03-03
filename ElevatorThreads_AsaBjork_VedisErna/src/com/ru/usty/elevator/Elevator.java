@@ -1,12 +1,8 @@
 package com.ru.usty.elevator;
 
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-
 /**
- * @author Asa Bjork Valdimarsdottir - asav13@ru.is
+ * @author  Asa Bjork Valdimarsdottir   - asav13@ru.is
+ *          Vedis Erna Eyjolfsdottir    - vedise13@ru.is
  * @since 01-Mar-16.
  */
 public class Elevator implements Runnable{
@@ -15,13 +11,10 @@ public class Elevator implements Runnable{
     private int     index;
     private boolean goingUp;
 
-    private Set<Integer> letPeopleInAt;
-
     public Elevator(int index) {
         this.index      = index;
         this.currFloor  = 0;    // Starts on first floor
         this.goingUp    = true; // Starts by going up
-        this.letPeopleInAt = new HashSet<>();
     }
 
     @Override
@@ -31,15 +24,14 @@ public class Elevator implements Runnable{
             elevatorSleep();    // Visualization
 
             // Let people out
-            int counter = ElevatorScene.scene.getNumberOfPeopleInElevator(index);
+            int counter = ElevatorScene.scene.getNumberOfPeopleInElevator(this.index);
             // If there is someone in the elevator
             if(counter > 0){
                 // And while there is someone in that elevator that wants to get out on this floor
-
-                while(ElevatorScene.scene.waitToGetOutOfElevatorToFloor.get(index)[currFloor].hasQueuedThreads()
+                while(ElevatorScene.scene.waitToGetOutOfElevatorToFloor.get(this.index)[this.currFloor].hasQueuedThreads()
                         && counter > 0){
                     // Let one out at a time
-                    ElevatorScene.scene.waitToGetOutOfElevatorToFloor.get(index)[currFloor].release(1);
+                    ElevatorScene.scene.waitToGetOutOfElevatorToFloor.get(this.index)[this.currFloor].release(1);
                     counter--;
                     elevatorSleep();    // Visualization
                 }
@@ -48,19 +40,21 @@ public class Elevator implements Runnable{
             // Let people in to the elevator
             counter = ElevatorScene.scene.getNumberOfPeopleInElevator(index);
             // If we have space and there is someone waiting on the current floor
-            if(ElevatorScene.scene.getNumberOfPeopleWaitingAtFloor(currFloor) > 0 && counter < ElevatorScene.scene.ELEVATOR_CAPACITY){
+            if(ElevatorScene.scene.getNumberOfPeopleWaitingAtFloor(this.currFloor) > 0
+                    && counter < ElevatorScene.scene.ELEVATOR_CAPACITY){
                 imLettingIn();
+                ElevatorScene.scene.setWhoIsLettingInAtFloor(this.currFloor, this.index);
                 // We let people in while the elevator is not full
                 while(counter < ElevatorScene.scene.ELEVATOR_CAPACITY){
-                    ElevatorScene.scene.waitToGetInFromFloor.get(currFloor).release(1);
+                    //System.out.println("DEB: I am letting in " + index);
+                    ElevatorScene.scene.waitToGetInFromFloor.get(this.currFloor).release(1);
+
                     counter++;
-                    letPeopleInAt.add(currFloor);
                     if(counter < 6) { elevatorSleep(); }    // Visualization, no sleep when full
                 }
+                elevatorSleep(); // viz
                 ElevatorScene.scene.whoIsLettingInMutex.release();
-
             }
-
             switchFloor();      // Move elevator
         }
     }
@@ -75,21 +69,20 @@ public class Elevator implements Runnable{
         }
     }
 
-
     private void switchFloor(){
         if(noNeedToMove()){
             return;
         }
-        if(goingUp && currFloor < ElevatorScene.scene.getNumberOfFloors()-1 && needToGoUp()){
-            currFloor++;
+        if(this.goingUp && this.currFloor < ElevatorScene.scene.getNumberOfFloors()-1 && needToGoUp()){
+            this.currFloor++;
         } else {
-            if(currFloor == 0){
-                goingUp = true;
-                currFloor++;
+            if(this.currFloor == 0){
+                this.goingUp = true;
+                this.currFloor++;
             } else {
-                goingUp = false;
-                currFloor--;
-                if(currFloor < 0) currFloor = 0; // Just safety measures
+                this.goingUp = false;
+                this.currFloor--;
+                if(this.currFloor < 0) this.currFloor = 0; // Just safety measures
             }
         }
         // SetFloor
@@ -117,12 +110,12 @@ public class Elevator implements Runnable{
     }
 
     private boolean needToGoUp(){
-        for(int f = currFloor+1; f < ElevatorScene.scene.getNumberOfFloors(); f++){
+        for(int f = this.currFloor+1; f < ElevatorScene.scene.getNumberOfFloors(); f++){
             if(ElevatorScene.scene.isButtonPushedAtFloor(f)){
                 return true;
             }
         }
-        for(int f = currFloor+1; f < ElevatorScene.scene.getNumberOfFloors(); f++){
+        for(int f = this.currFloor+1; f < ElevatorScene.scene.getNumberOfFloors(); f++){
             if(ElevatorScene.scene.waitToGetOutOfElevatorToFloor.get(index)[f].hasQueuedThreads()){
                 return true;
             }
@@ -130,12 +123,12 @@ public class Elevator implements Runnable{
         return false;
     }
     private boolean needToGoDown(){
-        for(int f = currFloor-1; f >= 0; f--){
+        for(int f = this.currFloor-1; f >= 0; f--){
             if(ElevatorScene.scene.isButtonPushedAtFloor(f)){
                 return true;
             }
         }
-        for(int f = currFloor-1; f >= 0; f--){
+        for(int f = this.currFloor-1; f >= 0; f--){
             if(ElevatorScene.scene.waitToGetOutOfElevatorToFloor.get(index)[f].hasQueuedThreads()){
                 return true;
             }
@@ -151,7 +144,7 @@ public class Elevator implements Runnable{
     private void imLettingIn(){
         try {
             ElevatorScene.scene.whoIsLettingInMutex.acquire();
-            ElevatorScene.scene.setWhoIsLettingIn(index);
+
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

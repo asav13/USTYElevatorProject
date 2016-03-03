@@ -1,19 +1,20 @@
 package com.ru.usty.elevator;
 
 /**
- * @author Asa Bjork Valdimarsdottir - asav13@ru.is
+ * @author  Asa Bjork Valdimarsdottir   - asav13@ru.is
+ *          Vedis Erna Eyjolfsdottir    - vedise13@ru.is
  * @since 01-Mar-16.
  */
 public class Person implements Runnable{
 
-    private int src;
-    private int dest;
-    private int elevatorIndex;
+    private int     src;
+    private int     dest;
+    private int     elevatorIndex;
 
     public Person(int src, int dest){
-        this.src = src;
-        this.dest = dest;
-        this.elevatorIndex = 0;
+        this.src            = src;
+        this.dest           = dest;
+        this.elevatorIndex  = 0;
     }
     @Override
     public void run() {
@@ -28,7 +29,7 @@ public class Person implements Runnable{
         }
 
         // When we are here it means we've gotten inside an elevator
-        this.elevatorIndex = ElevatorScene.scene.getWhoIsLettingIn();
+        findWhoLetMeIn();
 
         // Increment people in elevator and decrement people waiting on floor
         incInElevator();
@@ -36,7 +37,7 @@ public class Person implements Runnable{
 
         // Wait to get out
         try {
-            ElevatorScene.scene.waitToGetOutOfElevatorToFloor.get(this.elevatorIndex)[dest].acquire();
+            ElevatorScene.scene.waitToGetOutOfElevatorToFloor.get(this.elevatorIndex)[this.dest].acquire();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -45,15 +46,13 @@ public class Person implements Runnable{
         // Decrement people in elevator and increment people outside of it
         decInElevator();
         incOutside();
-
-        // Then we need to kill the thread...right?
     }
 
     /* Helper functions for readability, too many "try catch" blocks */
 
     private void incWaiting(){
         try {
-            ElevatorScene.scene.incNumberOfPeopleWaitingAtFloor(src);
+            ElevatorScene.scene.incNumberOfPeopleWaitingAtFloor(this.src);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -61,7 +60,7 @@ public class Person implements Runnable{
 
     private void decWaiting(){
         try {
-            ElevatorScene.scene.decNumberOfPeopleWaitingAtFloor(src);
+            ElevatorScene.scene.decNumberOfPeopleWaitingAtFloor(this.src);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -84,8 +83,21 @@ public class Person implements Runnable{
     }
 
     private void incOutside(){
-        ElevatorScene.scene.personExitsAtFloor(dest);
+        ElevatorScene.scene.personExitsAtFloor(this.dest);
     }
 
-
+    private void findWhoLetMeIn() {
+        while(true) {
+            try {
+                this.elevatorIndex = ElevatorScene.scene.getWhoIsLettingInAtFloor(this.src);
+                break;
+            } catch (Exception e) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        }
+    }
 }

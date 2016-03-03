@@ -1,7 +1,5 @@
 package com.ru.usty.elevator;
-
-
-import java.util.ArrayList;
+import java.util.*;
 import java.util.concurrent.Semaphore;
 
 /**
@@ -26,8 +24,7 @@ public class ElevatorScene {
     public static ArrayList<Semaphore> waitToGetInFromFloor;
     public static ArrayList<Semaphore[]> waitToGetOutOfElevatorToFloor;
     public ArrayList<Integer> currFloor;
-    public int whoIsLettingIn;
-
+    public List<Integer> whoIsLettingInAtFloor;
 
     // People counters
     ArrayList<Integer> peopleInElevator;
@@ -48,7 +45,7 @@ public class ElevatorScene {
         this.waitToGetInFromFloor = new ArrayList<>();
         this.waitToGetOutOfElevatorToFloor = new ArrayList<Semaphore[]>();
         this.currFloor = new ArrayList<>();
-        this.whoIsLettingIn = -1;
+        this.whoIsLettingInAtFloor = new ArrayList<>();
 
         this.peopleInElevator = new ArrayList<Integer>();
         this.exitedCount = new ArrayList<Integer>();
@@ -71,8 +68,10 @@ public class ElevatorScene {
         this.numberOfFloors = numberOfFloors;
         this.numberOfElevators = numberOfElevators;
 
-		/* ELEVATOR THREADS and information */
+		/* Elevtor threads and information */
         this.elevators.clear();
+        this.peopleInElevator.clear();
+        this.currFloor.clear();
         for (int i = 0; i < numberOfElevators; i++) {
             this.elevators.add(new Thread(new Elevator(i)));
             this.elevators.get(i).start();
@@ -83,9 +82,12 @@ public class ElevatorScene {
 
 		/* Semaphores for waiting for an elevator */
         this.waitToGetInFromFloor.clear();
+        this.whoIsLettingInAtFloor.clear();
         for (int i = 0; i < numberOfFloors; i++) {
-            waitToGetInFromFloor.add(new Semaphore(0));
+            this.waitToGetInFromFloor.add(new Semaphore(0));
+            this.whoIsLettingInAtFloor.add(0);// ?!?!?!?!? TODO
         }
+
 		/* Semaphores for waiting to get out of  an elevator */
         this.waitToGetOutOfElevatorToFloor.clear();
         for (int i = 0; i < numberOfElevators; i++) {
@@ -130,13 +132,13 @@ public class ElevatorScene {
 
     public void setCurrentFloorForElevator(int elevator, int floor) throws InterruptedException {
         currFloorMutex.acquire();
-        currFloor.set(elevator, floor);
+            currFloor.set(elevator, floor);
         currFloorMutex.release();
     }
 
     //Base function: definition must not change, but add your code
     public int getNumberOfPeopleInElevator(int elevator) {
-        int r = -1;
+        int r = 0;
         if (peopleInElevatorMutex == null) {
             peopleInElevatorMutex = new Semaphore(1);
         }
@@ -152,13 +154,15 @@ public class ElevatorScene {
 
     public void incNumberOfPeopleInElevator(int elevator) throws InterruptedException {
         peopleInElevatorMutex.acquire();
-        peopleInElevator.set(elevator, (peopleInElevator.get(elevator) + 1));
+            peopleInElevator.set(elevator, (peopleInElevator.get(elevator) + 1));
+            int r = peopleInElevator.get(elevator);
         peopleInElevatorMutex.release();
+        if(r > 6) System.out.println("ERROR: People in elevator " + r);
     }
 
     public void decNumberOfPeopleInElevator(int elevator) throws InterruptedException {
         peopleInElevatorMutex.acquire();
-        peopleInElevator.set(elevator, (peopleInElevator.get(elevator) - 1));
+            peopleInElevator.set(elevator, (peopleInElevator.get(elevator) - 1));
         peopleInElevatorMutex.release();
     }
 
@@ -186,13 +190,13 @@ public class ElevatorScene {
 
     public void incNumberOfPeopleWaitingAtFloor(int floor) throws InterruptedException {
         peopleWaitingOnFloorMutex.acquire();
-        peopleWaitingOnFloor.set(floor, (peopleWaitingOnFloor.get(floor) + 1));
+            peopleWaitingOnFloor.set(floor, (peopleWaitingOnFloor.get(floor) + 1));
         peopleWaitingOnFloorMutex.release();
     }
 
     public void decNumberOfPeopleWaitingAtFloor(int floor) throws InterruptedException {
         peopleWaitingOnFloorMutex.acquire();
-        peopleWaitingOnFloor.set(floor, (peopleWaitingOnFloor.get(floor) - 1));
+           peopleWaitingOnFloor.set(floor, (peopleWaitingOnFloor.get(floor) - 1));
         peopleWaitingOnFloorMutex.release();
     }
 
@@ -232,7 +236,7 @@ public class ElevatorScene {
     public void personExitsAtFloor(int floor) {
         try {
             exitedCountMutex.acquire();
-            exitedCount.set(floor, (exitedCount.get(floor) + 1));
+                exitedCount.set(floor, (exitedCount.get(floor) + 1));
             exitedCountMutex.release();
         } catch (InterruptedException e) {
             System.out.println("MUTEX ERROR: While exiting floor.");
@@ -241,7 +245,6 @@ public class ElevatorScene {
     }
 
     public int getExitedCountAtFloor(int floor) {
-
         if (floor < getNumberOfFloors()) {
             return exitedCount.get(floor);
         } else {
@@ -249,14 +252,14 @@ public class ElevatorScene {
         }
     }
 
-    public int getWhoIsLettingIn() {
-        return whoIsLettingIn;
+    public int getWhoIsLettingInAtFloor(int floor) throws Exception {
+        return whoIsLettingInAtFloor.get(floor);
     }
 
-    // NOTA BENE the caller needs to take care of the MUTEX here, so he can choose
+    // The caller needs to take care of the MUTEX here, so he can choose
     // when to release it, needs to hold on to it while letting ppl in
-    public void setWhoIsLettingIn(int index) {
-        whoIsLettingIn = index;
+    public void setWhoIsLettingInAtFloor( int floor, int index) {
+        whoIsLettingInAtFloor.set(floor, index);
     }
 
 }
