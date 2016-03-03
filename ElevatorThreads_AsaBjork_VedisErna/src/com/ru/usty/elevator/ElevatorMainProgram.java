@@ -2,8 +2,6 @@ package com.ru.usty.elevator;
 
 import com.ru.usty.elevator.visualization.TestSuite;
 
-import java.util.concurrent.Semaphore;
-
 public class ElevatorMainProgram {
 	public static void main(String[] args) throws InterruptedException {
 
@@ -22,9 +20,9 @@ public class ElevatorMainProgram {
 
 			Thread.sleep(2000);
 
-			for(int i = 0; i <= 4; i++) {
+			for(int i = 0; i <= 9; i++) {
 				TestSuite.runTest(i);
-			Thread.sleep(12000);
+			Thread.sleep(3000);
 	}
 
 /*************************************************************/

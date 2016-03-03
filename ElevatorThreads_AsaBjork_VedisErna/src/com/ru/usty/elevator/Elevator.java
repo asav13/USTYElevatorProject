@@ -63,13 +63,16 @@ public class Elevator implements Runnable{
     }
 
     private void switchFloor(){
-        if(goingUp && currFloor < ElevatorScene.scene.getNumberOfFloors()-1){
+        if(noNeedToMove()){
+            return;
+        }
+        if(goingUp && currFloor < ElevatorScene.scene.getNumberOfFloors()-1 && needToGoUp()){
             currFloor++;
         } else {
             if(currFloor == 0){
                 goingUp = true;
                 currFloor++;
-            } else {
+            } else if(needToGoDown()) {
                 goingUp = false;
                 currFloor--;
             }
@@ -84,5 +87,44 @@ public class Elevator implements Runnable{
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    private boolean noNeedToMove(){
+        for(int f = 0; f < ElevatorScene.scene.getNumberOfFloors(); f++){
+            if(ElevatorScene.scene.isButtonPushedAtFloor(f)){
+                return false;
+            }
+        }
+        if(ElevatorScene.scene.getNumberOfPeopleInElevator(index) > 0){
+            return false;
+        }
+        return true;
+    }
+
+    private boolean needToGoUp(){
+        for(int f = currFloor+1; f < ElevatorScene.scene.getNumberOfFloors(); f++){
+            if(ElevatorScene.scene.isButtonPushedAtFloor(f)){
+                return true;
+            }
+        }
+        for(int f = currFloor+1; f < ElevatorScene.scene.getNumberOfFloors(); f++){
+            if(ElevatorScene.scene.waitToGetOutOfElevatorToFloor.get(index)[f].hasQueuedThreads()){
+                return true;
+            }
+        }
+        return false;
+    }
+    private boolean needToGoDown(){
+        for(int f = currFloor-1; f >= 0; f--){
+            if(ElevatorScene.scene.isButtonPushedAtFloor(f)){
+                return true;
+            }
+        }
+        for(int f = currFloor-1; f >= 0; f--){
+            if(ElevatorScene.scene.waitToGetOutOfElevatorToFloor.get(index)[f].hasQueuedThreads()){
+                return false;
+            }
+        }
+        return true;
     }
 }

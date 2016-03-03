@@ -13,7 +13,7 @@ import java.util.concurrent.Semaphore;
  */
 
 public class ElevatorScene {
-	public static final int VISUALIZATION_WAIT_TIME = 300;  // milliseconds
+	public static final int VISUALIZATION_WAIT_TIME = 50;  // milliseconds
 	public static final	int ELEVATOR_CAPACITY 		= 6;	// max six people per elevator
 
 	public static ElevatorScene scene;
@@ -55,6 +55,14 @@ public class ElevatorScene {
 	//Necessary to add your code in this one
 	public void restartScene(int numberOfFloors, int numberOfElevators) {
 
+        for(Thread thread : elevators) {
+            if(thread != null) {
+                if(thread.isAlive()){
+                    thread.stop();
+                }
+            }
+        }
+
 		/* State variables*/
 		this.numberOfFloors 		= numberOfFloors;
 		this.numberOfElevators 		= numberOfElevators;
@@ -64,6 +72,7 @@ public class ElevatorScene {
 		for(int i = 0; i < numberOfElevators; i++){
 			this.elevators.add(new Thread(new Elevator(i)));
 			this.elevators.get(i).start();
+
 			this.peopleInElevator.add(0);
 			this.currFloor.add(0);
 		}
@@ -96,6 +105,7 @@ public class ElevatorScene {
 			this.peopleWaitingOnFloor.add(0);
 			this.exitedCount.add(0);
 		}
+
 	}
 
 	//Base function: definition must not change
@@ -153,8 +163,10 @@ public class ElevatorScene {
 		if(peopleWaitingOnFloorMutex == null){
 			peopleInElevatorMutex = new Semaphore(1);
 		}
+        if(!(floor < peopleWaitingOnFloor.size())){
+            return 0;
+        }
         try {
-
             peopleWaitingOnFloorMutex.acquire();
 			if(floor > peopleWaitingOnFloor.size()){
 				return 0;

@@ -85,19 +85,24 @@ Test case 9 is of the easiest level of complexity but tests both taking in full 
 			visualizationScene.restartScene(4, 1);
 			break;
 		case 4:
-			visualizationScene.restartScene(4, 3);
+			//visualizationScene.restartScene(4, 3);
+            visualizationScene.restartScene(4, 1);
 			break;
 		case 5:
-			visualizationScene.restartScene(3, 5);
+			//visualizationScene.restartScene(3, 5);
+            visualizationScene.restartScene(3, 1);
 			break;
 		case 6:
-			visualizationScene.restartScene(3, 5);
+			//visualizationScene.restartScene(3, 5);
+            visualizationScene.restartScene(3, 1);
 			break;
 		case 7:
-			visualizationScene.restartScene(5, 2);
+            visualizationScene.restartScene(5, 1);
+			//visualizationScene.restartScene(5, 2);
 			break;
 		case 8:
-			visualizationScene.restartScene(5, 3);
+            visualizationScene.restartScene(5, 1);
+			//visualizationScene.restartScene(5, 3);
 			break;
 		case 9:
 			visualizationScene.restartScene(2, 1);
